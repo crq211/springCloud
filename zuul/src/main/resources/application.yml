@@ -1,0 +1,32 @@
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:8761/eureka/
+spring:
+  application:
+    name: product-service-zuul
+zuul:
+  routes:
+    api-a:
+      path: /api-data/**
+      serviceId: PRODUCT-DATA-SERVICE
+    api-b:
+      path: /api-view/**
+      serviceId: PRODUCT-VIEW-SERVICE-FEIGN
+
+#  为何要用网关
+#  我们现在有两种微服务，分别是数据微服务和视图微服务。
+#  他们有可能放在不同的 ip 地址上，有可能是不同的端口。
+#  为了访问他们，就需要记录这些地址和端口。 而地址和端口都可能会变化，这就增加了访问者的负担。
+#  所以这个时候，我们就可以用网关来解决这个问题。
+#  如图所示，我们只需要记住网关的地址和端口号就行了。
+#  如果要访问数据服务，访问地址 http://ip:port/api-data/ps 即可。
+#  如果要访问视图服务，访问地址 http://ip:port/api-view/ps 即可。
+
+
+#  1. 首先挨个运行 EurekaServerApplication, ConfigServerApplication,
+#  ProductDataServiceApplication，(可以启动两个)  ProductViewServiceFeignApplication。
+#  2. 然后启动 ProductServiceZuulApplication
+#  3. 接着访问地址：
+#  http://localhost:8040/api-data/s
+#  http://localhost:8040/api-view/ps

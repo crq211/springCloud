@@ -1,0 +1,42 @@
+spring:
+  cloud:
+    config:
+      label: master
+      profile: dev
+      discovery:
+        enabled:  true
+        serviceId:  config-server
+#   新增 but总线配置
+    bus:
+      enabled: true
+      trace:
+        enabled: true
+  client:
+    serviceUrl:
+      defaultZone:  http://localhost:8761/eureka/
+
+#新增 rabbitMQ 配置
+rabbitmq:
+  host: localhost
+  port: 5672
+  username: guest
+  password: guest
+
+
+
+
+
+#  1. 首先挨个启动 EurekaServerApplication, ConfigServerApplication, ProductDataServiceApplication
+#  2. 然后启动两个视图微服务 ProductViewServiceFeignApplication，端口号分别是 8012, 8013.
+#  3. 此时访问
+#  http://127.0.0.1:8012/ps
+#  http://127.0.0.1:8013/ps
+#  可以看到版本号是 1.2 （或者另一个值，因为已经被我修改了）
+#  4. 修改 git 里的版本号为新的数值
+#  5. 然后运行 FreshConfigUtil， 使用 post 的方式访问 http://localhost:8012/actuator/bus-refresh 地址，
+#  之所以要专门做一个 FreshConfigUtil 类，就是为了可以使用 post 访问，因为它不支持 get 方式访问，会抛出 405错误的。
+#  这个地址的作用就是让 config-server 去 git 获取最新的配置信息，并把此信息广播给集群里的两个 视图微服务。
+#  6. 再次访问
+#  http://127.0.0.1:8012/ps
+#  http://127.0.0.1:8013/ps
+#  可以看到 版本号是修改之后的值了

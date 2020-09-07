@@ -1,0 +1,54 @@
+#  接下来我们把现成的 视图微服务-Feign 改造成配置客户端，使得其可以从配置服务器上获取版本信息。
+#eureka:
+#  client:
+#    serviceUrl:
+#      defaultZone: http://localhost:8761/eureka/
+# 上面注释掉是为了改造成 配置客户端，把上面的移到bootstrap.yml中
+# 作为配置客户端，比较。。。特别~ 它需要在 bootstrap.yml 里配置 config-server 的信息
+# bootstrap.yml 和 application.yml 的区别，简单说就是前者先启动
+
+
+#  挨个启动 EurekaServerApplication, ConfigServerApplication, ProductDataServiceApplication,
+#           ProductViewServiceFeignApplication, 然后访问如下地址：
+#  http://localhost:8012/ps
+#  可以看到版本信息： how2j springcloud version 1.0
+
+
+#  现在修改 版本信息：
+#  https://github.com/how2j/springcloudConfig/blob/master/respo/product-view-service-feign-dev.properties
+#  改成 version = how2j springcloud version 1.1,
+#
+#  然后刷新 http://localhost:8012/ps 会发现。。。。它还是 1.0.。。。 那么要如何生效呢？ 就必须重启 ConfigServerApplication 和 ProductViewServiceFeignApplication 才行了~
+#
+#  这就。。。未免有点 2 了吧~
+#
+#  所以接下来就要讲解如何通过 rabbitMQ 动态刷新啦
+spring:
+  application:
+    name: product-view-service-feign
+  thymeleaf:
+    cache: false
+    prefix: classpath:/templates/
+    suffix: .html
+    encoding: UTF-8
+    mode: HTML5
+    servlet:
+      content-type: text/html
+  zipkin:
+    base-url: http://localhost:9411
+#    打开链路追踪服务器 http://localhost:9411/zipkin/dependency/
+
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+      cors:
+        allowed-origins: "*"
+        allowed-methods: "*"
+#        这样才能访问 /actuator/bus-refresh
+
+
+#  在配置文件里开启断路器
+feign.hystrix.enabled: true
